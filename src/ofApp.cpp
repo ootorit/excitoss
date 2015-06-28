@@ -34,6 +34,27 @@ void ofApp::setup(){
     ofSetVerticalSync(true);
     ofSetLogLevel(OF_LOG_VERBOSE);
     
+    
+    //kinect調整用GUI
+    panel.setup("distance in mm", "settings.xml", 540, 100);
+    panel.add(minDistance.setup("minDistance",100,0,12000));
+    panel.add(maxDistance.setup("maxDistance",6000,0,12000));
+    
+    panel.add(minDetectSize.setup("minDetectSize",2,0,1000));
+    panel.add(maxDetectSize.setup("maxDetectSize",1000,0,300000));
+    panel.add(maxDetectNumber.setup("maxDetectNumber",10,0,300));
+    
+    //    panel.add(kinectFrameRate.setup("kinectFrameRate",30,0,120));
+    panel.add(ofFrameRate.setup("ofFrameRate",60,0,120));
+    panel.loadFromFile("settings.xml");
+    
+    minDistance.addListener(this, &ofApp::onMinDistanceChanged );
+    maxDistance.addListener(this, &ofApp::onMaxDistanceChanged );
+    minDetectSize.addListener(this, &ofApp::onValueChanged );
+    maxDetectSize.addListener(this, &ofApp::onValueChanged );
+    maxDetectNumber.addListener(this, &ofApp::onValueChanged );
+    ofFrameRate.addListener(this, &ofApp::onOfFrameRateChanged);
+    
     //***kinect***//
     
     // enable depth->video image calibration
@@ -66,14 +87,14 @@ void ofApp::setup(){
     grayThreshFar2.allocate(kinect2.width, kinect2.height);
     
     //Threshold
-    nearThreshold = 255;
-    farThreshold = 185;
+    nearThreshold = 54;
+    farThreshold = 24;
     nearThreshold2 = 255;
     farThreshold2 = 190;
-    blobThreshold = 1000;
+    maxDetectNumber = 1000;
     bThreshWithOpenCV = true;
     
-    ofSetWindowShape(1920,1080);
+    ofSetWindowShape(1270,760);
     ofSetFrameRate(30);
     
     // zero the tilt on startup
@@ -292,10 +313,10 @@ void ofApp::update(){
         
         // find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
         // also, find holes is set to true so we will get interior contours as well....
-        contourFinder.findContours(grayImage, 2000, (kinect.width*kinect.height)/2, blobThreshold, false);
+        contourFinder.findContours(grayImage, minDetectSize, maxDetectSize, maxDetectNumber, false);
         // find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
         // also, find holes is set to true so we will get interior contours as well....
-        contourFinder2.findContours(grayImage2, 2000, (kinect2.width*kinect2.height)/2, blobThreshold, false);
+        contourFinder2.findContours(grayImage2, 2000, (kinect2.width*kinect2.height)/2, maxDetectNumber, false);
       
         for( int i=0; i<contourFinder.nBlobs; i++ ) {
 
@@ -663,7 +684,9 @@ void ofApp::draw(){
     if(titleFlag){
         titleImg.draw(290,120,700,480);
     }
-    
+    if(parameterMode){
+        panel.draw();
+    }
 }
 
 //--------------------------------------------------------------
@@ -836,6 +859,9 @@ void ofApp::keyPressed(int key){
             nearThreshold2 --;
             if (nearThreshold2 < 0) nearThreshold2 = 0;
             break;
+        case 'p':
+            parameterMode = !parameterMode;
+            break;
             
     }
 
@@ -845,7 +871,7 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-    kinect.setCameraTiltAngle(30); // zero the tilt on exit
+    kinect.setCameraTiltAngle(0); // zero the tilt on exit
     kinect.close();
 }
 //--------------------------------------------------------------
@@ -903,6 +929,24 @@ bool ofApp::detectRectangleCollision( const ofRectangle& firstRectangle,const of
     }
 
     return false;
+}
+
+
+void ofApp::onMinDistanceChanged(int& num){
+    panel.saveToFile("settings.xml");
+//    nearThreshold =
+}
+void ofApp::onMaxDistanceChanged(int& num){
+    panel.saveToFile("settings.xml");
+//    farThreshold =
+}
+void ofApp::onValueChanged(int& num){
+    panel.saveToFile("settings.xml");
+}
+
+void ofApp::onOfFrameRateChanged(int& num){
+    ofSetFrameRate(ofFrameRate);
+    panel.saveToFile("settings.xml");
 }
 
 

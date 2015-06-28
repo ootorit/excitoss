@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>79BDE0C5-4CF6-4A54-AF3F-71B7928D522D</string>
+	<key>IDESourceControlProjectName</key>
+	<string>project</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>3DC214287B8AA4ECF4E6D951B6DC2F77AD88CDE1</key>
+		<string>https://github.com/ootorit/excitoss.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>bapaproto_0610.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>3DC214287B8AA4ECF4E6D951B6DC2F77AD88CDE1</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/ootorit/excitoss.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>3DC214287B8AA4ECF4E6D951B6DC2F77AD88CDE1</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>3DC214287B8AA4ECF4E6D951B6DC2F77AD88CDE1</string>
+			<key>IDESourceControlWCCName</key>
+			<string>excitoss</string>
+		</dict>
+	</array>
+</dict>
+</plist>

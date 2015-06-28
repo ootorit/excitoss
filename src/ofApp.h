@@ -4,6 +4,8 @@
 #include "ofxOpenCv.h"
 #include "ofxKinect.h"
 #include "ofxBox2d.h"
+#include "ofxGui.h"
+#include "ofxXmlSettings.h"
 #include <time.h>
 
 class ofApp : public ofBaseApp{
@@ -30,7 +32,7 @@ public:
     int nearThreshold2;
     int farThreshold2;
     int angle;
-    int blobThreshold;
+
     
     int centerX[10];
     int centerY[10];
@@ -131,6 +133,30 @@ public:
     bool blueWinFlag;
     bool drawFlag;
     
+    
+    //GUIを用いたkinectのパラメータ調整用
+    bool parameterMode = false;
+    ofxPanel panel;
+    ofxSlider <int> minDistance;
+    ofxSlider <int> maxDistance;
+    ofxSlider <int> ofFrameRate;
+    
+    ofxSlider <int> minDetectSize;
+    ofxSlider <int> maxDetectSize;
+    ofxSlider <int> maxDetectNumber;
+
+    
+    
+    void onMinDistanceChanged(int& num);
+    void onMaxDistanceChanged(int& num);
+    
+
+    void onOfFrameRateChanged(int& num);
+    
+    //値が変わった時に保存だけすればよい変数のリスナ
+    void onValueChanged(int& num);
+    
+
     
     
 };
