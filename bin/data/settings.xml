@@ -1,9 +1,12 @@
 <distance_in_mm>
-	<minDistance>2700</minDistance>
-	<maxDistance>4920</maxDistance>
-	<minDetectSize>380</minDetectSize>
-	<maxDetectSize>204000</maxDetectSize>
-	<maxDetectNumber>55</maxDetectNumber>
-	<ofFrameRate>81</ofFrameRate>
+	<minDistance>3037</minDistance>
+	<maxDistance>4949</maxDistance>
+	<minDetectSize>95</minDetectSize>
+	<maxDetectSize>52500</maxDetectSize>
+	<maxDetectNumber>192</maxDetectNumber>
+	<ofFrameRate>30</ofFrameRate>
 <distance_in_mm/>
+<tiltAngle>-7</tiltAngle>
+<nearThreshold>77</nearThreshold>
+	<farThreshold>51</farThreshold>
 </distance_in_mm>

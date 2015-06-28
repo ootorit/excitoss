@@ -27,11 +27,7 @@ public:
     void gotMessage(ofMessage msg);
     
     bool bThreshWithOpenCV;
-    int nearThreshold;
-    int farThreshold;
-    int nearThreshold2;
-    int farThreshold2;
-    int angle;
+
 
     
     int centerX[10];
@@ -144,6 +140,14 @@ public:
     ofxSlider <int> minDetectSize;
     ofxSlider <int> maxDetectSize;
     ofxSlider <int> maxDetectNumber;
+    ofxSlider <int> tiltAngle;
+    ofxSlider <int> farThreshold;
+    ofxSlider <int> nearThreshold;
+    
+    
+
+    int nearThreshold2;
+    int farThreshold2;
 
     
     
@@ -152,9 +156,10 @@ public:
     
 
     void onOfFrameRateChanged(int& num);
-    
+    void onTiltAngleChanged(int& num);
     //値が変わった時に保存だけすればよい変数のリスナ
     void onValueChanged(int& num);
+    
     
 
     

@@ -30,6 +30,17 @@ void ofApp::setup(){
         tempo_speed[i]=10;
     }
     
+    //Threshold
+//    nearThreshold = 54;
+//    farThreshold = 24;
+    nearThreshold2 = 255;
+    farThreshold2 = 190;
+
+    bThreshWithOpenCV = true;
+    
+    ofSetWindowShape(1270,760);
+    ofSetFrameRate(30);
+    
 
     ofSetVerticalSync(true);
     ofSetLogLevel(OF_LOG_VERBOSE);
@@ -37,12 +48,17 @@ void ofApp::setup(){
     
     //kinect調整用GUI
     panel.setup("distance in mm", "settings.xml", 540, 100);
-    panel.add(minDistance.setup("minDistance",100,0,12000));
-    panel.add(maxDistance.setup("maxDistance",6000,0,12000));
+    panel.add(minDistance.setup("minDistance",100,50,12000));
+    panel.add(maxDistance.setup("maxDistance",6000,50,12000));
+    panel.add(nearThreshold.setup("nearThreshold",0,0,255));
+    panel.add(farThreshold.setup("farThreshold",0,0,255));
     
     panel.add(minDetectSize.setup("minDetectSize",2,0,1000));
     panel.add(maxDetectSize.setup("maxDetectSize",1000,0,300000));
     panel.add(maxDetectNumber.setup("maxDetectNumber",10,0,300));
+    panel.add(tiltAngle.setup("tiltAngle",0,-30,30));
+    
+    
     
     //    panel.add(kinectFrameRate.setup("kinectFrameRate",30,0,120));
     panel.add(ofFrameRate.setup("ofFrameRate",60,0,120));
@@ -52,8 +68,13 @@ void ofApp::setup(){
     maxDistance.addListener(this, &ofApp::onMaxDistanceChanged );
     minDetectSize.addListener(this, &ofApp::onValueChanged );
     maxDetectSize.addListener(this, &ofApp::onValueChanged );
+    nearThreshold.addListener(this, &ofApp::onValueChanged );
+    farThreshold.addListener(this, &ofApp::onValueChanged );
     maxDetectNumber.addListener(this, &ofApp::onValueChanged );
+    tiltAngle.addListener(this, &ofApp::onTiltAngleChanged);
     ofFrameRate.addListener(this, &ofApp::onOfFrameRateChanged);
+    kinect.setCameraTiltAngle(tiltAngle);
+    kinect.setDepthClipping(minDistance,maxDistance);
     
     //***kinect***//
     
@@ -64,10 +85,10 @@ void ofApp::setup(){
     kinect.open(0);		// opens first available kinect
     
     //open kinect2
-    kinect2.setRegistration(true);
-    kinect2.init();
-    kinect2.open(1);		// opens first available kinect
-    
+//    kinect2.setRegistration(true);
+//    kinect2.init();
+//    kinect2.open(1);		// opens first available kinect
+//    
     // print the intrinsic IR sensor values
     if(kinect.isConnected()) {
         ofLogNotice() << "sensor-emitter dist: " << kinect.getSensorEmitterDistance() << "cm";
@@ -86,21 +107,8 @@ void ofApp::setup(){
     grayThreshNear2.allocate(kinect2.width, kinect2.height);
     grayThreshFar2.allocate(kinect2.width, kinect2.height);
     
-    //Threshold
-    nearThreshold = 54;
-    farThreshold = 24;
-    nearThreshold2 = 255;
-    farThreshold2 = 190;
-    maxDetectNumber = 1000;
-    bThreshWithOpenCV = true;
-    
-    ofSetWindowShape(1270,760);
-    ofSetFrameRate(30);
-    
-    // zero the tilt on startup
-    angle = 30;
-    kinect.setCameraTiltAngle(angle);
-    kinect2.setCameraTiltAngle(angle);
+
+
     
     //***Box2D***//
     
@@ -822,25 +830,26 @@ void ofApp::keyPressed(int key){
             }
                 break;
         }
-        case '>':
-            farThreshold ++;
-            if (farThreshold > 255) farThreshold = 255;
-            break;
-            
-        case '<':
-            farThreshold --;
-            if (farThreshold < 0) farThreshold = 0;
-            break;
-            
-        case '+':
-            nearThreshold ++;
-            if (nearThreshold > 255) nearThreshold = 255;
-            break;
-            
-        case '-':
-            nearThreshold --;
-            if (nearThreshold < 0) nearThreshold = 0;
-            break;
+            //ofxSliderにしたらインクリメントはエラーになるようなのでひとまずコメントアウト
+//        case '>':
+//            farThreshold += 1;
+//            if (farThreshold > 255) farThreshold = 255;
+//            break;
+//            
+//        case '<':
+//            farThreshold --;
+//            if (farThreshold < 0) farThreshold = 0;
+//            break;
+//            
+//        case '+':
+//            nearThreshold ++;
+//            if (nearThreshold > 255) nearThreshold = 255;
+//            break;
+//            
+//        case '-':
+//            nearThreshold --;
+//            if (nearThreshold < 0) nearThreshold = 0;
+//            break;
             
             
         case '.':
@@ -862,7 +871,8 @@ void ofApp::keyPressed(int key){
         case 'p':
             parameterMode = !parameterMode;
             break;
-            
+
+
     }
 
 }
@@ -871,7 +881,6 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::exit() {
-    kinect.setCameraTiltAngle(0); // zero the tilt on exit
     kinect.close();
 }
 //--------------------------------------------------------------
@@ -934,10 +943,12 @@ bool ofApp::detectRectangleCollision( const ofRectangle& firstRectangle,const of
 
 void ofApp::onMinDistanceChanged(int& num){
     panel.saveToFile("settings.xml");
+    kinect.setDepthClipping(minDistance,maxDistance);
 //    nearThreshold =
 }
 void ofApp::onMaxDistanceChanged(int& num){
     panel.saveToFile("settings.xml");
+    kinect.setDepthClipping(minDistance,maxDistance);
 //    farThreshold =
 }
 void ofApp::onValueChanged(int& num){
@@ -946,6 +957,12 @@ void ofApp::onValueChanged(int& num){
 
 void ofApp::onOfFrameRateChanged(int& num){
     ofSetFrameRate(ofFrameRate);
+    panel.saveToFile("settings.xml");
+}
+void ofApp::onTiltAngleChanged(int& num){
+    if(tiltAngle>30) tiltAngle=30;
+    else if(tiltAngle<-30) tiltAngle = -30;
+    kinect.setCameraTiltAngle(tiltAngle);
     panel.saveToFile("settings.xml");
 }
 
