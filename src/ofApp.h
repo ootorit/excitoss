@@ -143,6 +143,12 @@ public:
     ofxSlider <int> tiltAngle;
     ofxSlider <int> farThreshold;
     ofxSlider <int> nearThreshold;
+    ofxSlider <int> farThresholdDistance;
+    ofxSlider <int> nearThresholdDistance;
+    ofxSlider <float> lowPassValue;
+    ofxSlider <int> blurValue;
+    //しきい値を距離に変換するため
+    float rateOfthresholdToDistance;
     
     
 
@@ -159,10 +165,14 @@ public:
     void onTiltAngleChanged(int& num);
     //値が変わった時に保存だけすればよい変数のリスナ
     void onValueChanged(int& num);
+    void onNearThresholdDistanceChanged(int& num);
+    void onFarThresholdDistanceChanged(int& num);
+    void onLowPassValueChanged(float& num);
     
+    //周知fiterSize分の輝度情報を元に平滑化
+    void medianFilter( ofxCvGrayscaleImage& image, unsigned int filterSize);
     
 
-    
     
 };
 

@@ -36,7 +36,7 @@ void ofApp::setup(){
     nearThreshold2 = 255;
     farThreshold2 = 190;
 
-    bThreshWithOpenCV = true;
+    bThreshWithOpenCV = false;
     
     ofSetWindowShape(1270,760);
     ofSetFrameRate(30);
@@ -47,17 +47,21 @@ void ofApp::setup(){
     
     
     //kinect調整用GUI
+
     panel.setup("distance in mm", "settings.xml", 540, 100);
     panel.add(minDistance.setup("minDistance",100,50,12000));
     panel.add(maxDistance.setup("maxDistance",6000,50,12000));
+    panel.add(nearThresholdDistance.setup("nearThresholdDistance",0,0,3000));
+    panel.add(farThresholdDistance.setup("farThresholdDistance",0,0,3000));
     panel.add(nearThreshold.setup("nearThreshold",0,0,255));
     panel.add(farThreshold.setup("farThreshold",0,0,255));
     
-    panel.add(minDetectSize.setup("minDetectSize",2,0,1000));
-    panel.add(maxDetectSize.setup("maxDetectSize",1000,0,300000));
+    panel.add(minDetectSize.setup("minDetectSize",2,0,4000));
+    panel.add(maxDetectSize.setup("maxDetectSize",1000,0,100000));
     panel.add(maxDetectNumber.setup("maxDetectNumber",10,0,300));
     panel.add(tiltAngle.setup("tiltAngle",0,-30,30));
-    
+    panel.add(lowPassValue.setup("lowPassValue",0,0,1));
+    panel.add(blurValue.setup("blurValue",0,0,40));
     
     
     //    panel.add(kinectFrameRate.setup("kinectFrameRate",30,0,120));
@@ -68,13 +72,21 @@ void ofApp::setup(){
     maxDistance.addListener(this, &ofApp::onMaxDistanceChanged );
     minDetectSize.addListener(this, &ofApp::onValueChanged );
     maxDetectSize.addListener(this, &ofApp::onValueChanged );
+    nearThresholdDistance.addListener(this, &ofApp::onNearThresholdDistanceChanged );
+    farThresholdDistance.addListener(this, &ofApp::onFarThresholdDistanceChanged);
     nearThreshold.addListener(this, &ofApp::onValueChanged );
     farThreshold.addListener(this, &ofApp::onValueChanged );
     maxDetectNumber.addListener(this, &ofApp::onValueChanged );
     tiltAngle.addListener(this, &ofApp::onTiltAngleChanged);
     ofFrameRate.addListener(this, &ofApp::onOfFrameRateChanged);
+    lowPassValue.addListener(this, & ofApp::onLowPassValueChanged);
+    blurValue.addListener(this, &ofApp::onValueChanged );
+
     kinect.setCameraTiltAngle(tiltAngle);
     kinect.setDepthClipping(minDistance,maxDistance);
+    
+    rateOfthresholdToDistance = ( maxDistance  - minDistance )  / 255.0;
+    
     
     //***kinect***//
     
@@ -107,8 +119,6 @@ void ofApp::setup(){
     grayThreshNear2.allocate(kinect2.width, kinect2.height);
     grayThreshFar2.allocate(kinect2.width, kinect2.height);
     
-
-
     
     //***Box2D***//
     
@@ -290,6 +300,9 @@ void ofApp::update(){
         
         // load grayscale depth image from the kinect source
         grayImage.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
+        
+        //filtering
+        grayImage.blur(blurValue);
       //  grayImage.mirror(false,true);
         // we do two thresholds - one for the far plane and one for the near plane
         // we then do a cvAnd to get the pixels which are a union of the two thresholds
@@ -319,12 +332,14 @@ void ofApp::update(){
         // update the cv images
         grayImage2.flagImageChanged();
         
-        // find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
+
+        
+        // find rrs which are between the size of 20 pixels and 1/3 the w*h pixels.
         // also, find holes is set to true so we will get interior contours as well....
         contourFinder.findContours(grayImage, minDetectSize, maxDetectSize, maxDetectNumber, false);
         // find contours which are between the size of 20 pixels and 1/3 the w*h pixels.
         // also, find holes is set to true so we will get interior contours as well....
-        contourFinder2.findContours(grayImage2, 2000, (kinect2.width*kinect2.height)/2, maxDetectNumber, false);
+     //   contourFinder2.findContours(grayImage2, 2000, (kinect2.width*kinect2.height)/2, maxDetectNumber, false);
       
         for( int i=0; i<contourFinder.nBlobs; i++ ) {
 
@@ -341,8 +356,8 @@ void ofApp::update(){
                 //add center cross and center
                 centerX[i] = contourFinder.blobs[i].centroid.x;
                 centerY[i] = contourFinder.blobs[i].centroid.y;
-                center = "blob"+ofToString(i+1)+" "+ofToString(centerX[i])+","+ofToString(centerY[i]);
-                cout << center << endl;
+//                center = "blob"+ofToString(i+1)+" "+ofToString(centerX[i])+","+ofToString(centerY[i]);
+//                cout << center << endl;
                 
                 //ball
                 float r = ofRandom(40,80);
@@ -688,10 +703,10 @@ void ofApp::draw(){
     numberFont2.drawString(ofToString(blueNumber), ofGetWidth() - 40 - numberFont.stringWidth(ofToString(blueNumber)), 120);
     
     ofFill();
-    ofCircle(ofGetWidth()/2, ofGetHeight()/2, beat_circle_r);
-    if(titleFlag){
-        titleImg.draw(290,120,700,480);
-    }
+//    ofCircle(ofGetWidth()/2, ofGetHeight()/2, beat_circle_r);
+//    if(titleFlag){
+//        titleImg.draw(290,120,700,480);
+//    }
     if(parameterMode){
         panel.draw();
     }
@@ -942,13 +957,22 @@ bool ofApp::detectRectangleCollision( const ofRectangle& firstRectangle,const of
 
 
 void ofApp::onMinDistanceChanged(int& num){
+
+    maxDistance.setMin(minDistance);
     panel.saveToFile("settings.xml");
     kinect.setDepthClipping(minDistance,maxDistance);
+    rateOfthresholdToDistance = ( maxDistance  - minDistance )  / 255.0;
+
 //    nearThreshold =
 }
 void ofApp::onMaxDistanceChanged(int& num){
+    minDistance.setMax(maxDistance);
+    if(maxDistance <= minDistance ) maxDistance = minDistance;
     panel.saveToFile("settings.xml");
     kinect.setDepthClipping(minDistance,maxDistance);
+    rateOfthresholdToDistance = ( maxDistance  - minDistance )  / 255.0;
+    
+
 //    farThreshold =
 }
 void ofApp::onValueChanged(int& num){
@@ -966,4 +990,45 @@ void ofApp::onTiltAngleChanged(int& num){
     panel.saveToFile("settings.xml");
 }
 
+void ofApp::onNearThresholdDistanceChanged(int& num){
+    farThresholdDistance.setMin(nearThresholdDistance);
+
+    nearThreshold = ( (maxDistance - minDistance  - nearThresholdDistance )/ rateOfthresholdToDistance);
+    farThreshold =  ((maxDistance - minDistance - farThresholdDistance ) / rateOfthresholdToDistance);
+    panel.saveToFile("settings.xml");
+    
+}
+void ofApp::onFarThresholdDistanceChanged(int& num){
+    nearThresholdDistance.setMax(farThresholdDistance);
+    
+    nearThreshold = ( (maxDistance - minDistance  - nearThresholdDistance )/ rateOfthresholdToDistance);
+    farThreshold =  ((maxDistance - minDistance - farThresholdDistance ) / rateOfthresholdToDistance);
+    panel.saveToFile("settings.xml");
+    
+}
+void ofApp::onLowPassValueChanged(float& num){
+    ofxKinect::lowPassRate = lowPassValue;
+    std::cout  << ofxKinect::lowPassRate  << std::endl;
+    panel.saveToFile("settings.xml");
+}
+//void ofApp::medianFilter(ofxCvGrayscaleImage& image , unsigned int filterSize ){
+//    unsigned int size = ( filterSize + 2 ) * ( filterSize + 2 );
+//    std::vector<int> imageBufa( size );
+//
+//    for ( int i = 0 ; i < image.getWidth() ; i ++ ){
+//        for ( int j =  0 ; j < image.getHeight() ; j ++ ){
+//            for  ( int k = 0 ; k < size ; k ++ ){
+//                if ( i > 0 && i < image.getWidth() && j > 0 && j < image.getHeight() ){
+//                    imageBufa[k] =
+//                }
+//                else{
+//                    image.get
+//                    [ i + image.getWidth() * j ] = 0;
+//                }
+//            }
+//        }
+//        
+//    }
+//    
+//}
 
