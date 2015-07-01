@@ -16,6 +16,7 @@ void ofApp::setup(){
     redWinFlag = false;
     blueWinFlag = false;
     drawFlag = false;
+    game_flag = false;
     
     mySound.loadSound("nijion.wav");
     mySound.setLoop(false);
@@ -710,6 +711,16 @@ void ofApp::draw(){
     if(parameterMode){
         panel.draw();
     }
+    if(game_flag){
+    gettimeofday(&now,NULL);
+    int nowTime = ( now.tv_sec - start.tv_sec ) * 1000 + (now.tv_usec - start.tv_usec ) / 1000 ;
+    std::cout << "time:" << nowTime << std::endl;
+    for ( int i = 0 ; i <40 ; i ++){
+        if(abs(nowTime - tempo_list[i])  < 50){
+            ofRect(640,200,100,100);
+        }
+    }
+    }
 }
 
 //--------------------------------------------------------------
@@ -823,6 +834,8 @@ void ofApp::keyPressed(int key){
             redWinFlag = false;
             blueWinFlag = false;
             drawFlag = false;
+            gettimeofday(&start, NULL);
+            game_flag = true;
             break;
         }
         case 'q':
@@ -845,6 +858,13 @@ void ofApp::keyPressed(int key){
             }
                 break;
         }
+        case 'k':
+        {
+            balls.clear();
+            break;
+            
+        }
+            
             //ofxSliderにしたらインクリメントはエラーになるようなのでひとまずコメントアウト
 //        case '>':
 //            farThreshold += 1;
