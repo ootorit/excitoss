@@ -18,18 +18,18 @@ void ofApp::setup(){
     drawFlag = false;
     game_flag = false;
     
-    mySound.loadSound("nijion.wav");
+    mySound.loadSound("summer.wav");
     mySound.setLoop(false);
 
     tempo_num = 100;
     numberFont.loadFont("OstrichSans-Heavy.otf",108);
     numberFont2.loadFont("OstrichSans-Heavy.otf",108);
     
-    for(int i=0;i<tempo_num;i++){
-        tempo_radius[i]=10;
-        tempo_y[i]=-10*tempo_list[i];
-        tempo_speed[i]=10;
-    }
+//    for(int i=0;i<tempo_num;i++){
+//        tempo_radius[i]=10;
+//        tempo_y[i]=-10*tempo_list[i];
+//        tempo_speed[i]=10;
+//    }
     
     //Threshold
 //    nearThreshold = 54;
@@ -45,6 +45,27 @@ void ofApp::setup(){
 
     ofSetVerticalSync(true);
     ofSetLogLevel(OF_LOG_VERBOSE);
+    
+    //リズム読み込み
+    string filePath = "rythm.csv";
+    ofFile file(filePath);
+    ofBuffer buffer(file);
+    while (!buffer.isLastLine()) {
+        string line = buffer.getNextLine();
+        std::string tmp;
+        std::istringstream stream(line);
+        while(getline(stream,tmp,','))
+        {
+            tempo_list.push_back(std::atoi(tmp.c_str()));
+        }
+        
+    }
+    
+
+    std::cout << "rythm" << std::endl;
+    for ( int i = 0 ; i < tempo_list.size() ;i  ++ ){
+        std::cout <<   tempo_list[i] << "," ;
+    }
     
     
     //kinect調整用GUI
@@ -247,16 +268,16 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
     
-    for(int i=0;i<tempo_num;i++){
-        tempo_y[i] = tempo_y[i]+tempo_speed[i];
-        if(tempo_y[i]<400 && tempo_y[i]>330){
-            tempo_radius[i] = 60;
-            rhysm_flag = true;
-        }else{
-            tempo_radius[i] = 30;
-            rhysm_flag = false;
-        }
-    }
+//    for(int i=0;i<tempo_num;i++){
+//        tempo_y[i] = tempo_y[i]+tempo_speed[i];
+//        if(tempo_y[i]<400 && tempo_y[i]>330){
+//            tempo_radius[i] = 60;
+//            rhysm_flag = true;
+//        }else{
+//            tempo_radius[i] = 30;
+//            rhysm_flag = false;
+//        }
+//    }
     
     //***kinect***//
     
@@ -382,20 +403,20 @@ void ofApp::update(){
                 
                 nowClock = clock();
                 //tempo_list/30 のうちもっとも近い値を持ってくる
-                float nowTime = (float)(nowClock - startClock)/CLOCKS_PER_SEC;
-                for ( int i = 0 ; i < 60 ; i ++ ){
-                    if( nowTime < (tempo_list[i]/30.0)){
-                        
-                    }
-                    else if(i>1){
-                        //どちらかが0.2秒以内ならgood scoreを1にする
-                        float diff_1 = abs(nowTime-tempo_list[i]/30.0);
-                        float diff_2 = abs(nowTime-tempo_list[i-1]/30.0);
-                        if( diff_1 < 0.2 || diff_2 < 0.2 ){
-                            score = 1;
-                        }
-                    }
-                }
+//                float nowTime = (float)(nowClock - startClock)/CLOCKS_PER_SEC;
+//                for ( int i = 0 ; i < 60 ; i ++ ){
+//                    if( nowTime < (tempo_list[i]/30.0)){
+//                        
+//                    }
+//                    else if(i>1){
+//                        //どちらかが0.2秒以内ならgood scoreを1にする
+//                        float diff_1 = abs(nowTime-tempo_list[i]/30.0);
+//                        float diff_2 = abs(nowTime-tempo_list[i-1]/30.0);
+//                        if( diff_1 < 0.2 || diff_2 < 0.2 ){
+//                            score = 1;
+//                        }
+//                    }
+//                }
                 
 
                 balls.push_back(ofPtr<Ball>(new Ball( ofPtr<ofxBox2dCircle>(new ofxBox2dCircle()) )));
@@ -501,21 +522,21 @@ void ofApp::update(){
             }
             
             nowClock = clock();
-            //tempo_list/30 のうちもっとも近い値を持ってくる
-            float nowTime = (float)(nowClock - startClock)/CLOCKS_PER_SEC;
-            for ( int i = 0 ; i < 60 ; i ++ ){
-                if( nowTime < (tempo_list[i]/30.0)){
-                    
-                }
-                else if(i>1){
-                    //どちらかが0.2秒以内ならgood scoreを1にする
-                    float diff_1 = abs(nowTime-tempo_list[i]/30.0);
-                    float diff_2 = abs(nowTime-tempo_list[i-1]/30.0);
-                    if( diff_1 < 0.2 || diff_2 < 0.2 ){
-                        score = 1;
-                    }
-                }
-            }
+//            //tempo_list/30 のうちもっとも近い値を持ってくる
+//            float nowTime = (float)(nowClock - startClock)/CLOCKS_PER_SEC;
+//            for ( int i = 0 ; i < 60 ; i ++ ){
+//                if( nowTime < (tempo_list[i]/30.0)){
+//                    
+//                }
+//                else if(i>1){
+//                    //どちらかが0.2秒以内ならgood scoreを1にする
+//                    float diff_1 = abs(nowTime-tempo_list[i]/30.0);
+//                    float diff_2 = abs(nowTime-tempo_list[i-1]/30.0);
+//                    if( diff_1 < 0.2 || diff_2 < 0.2 ){
+//                        score = 1;
+//                    }
+//                }
+//            }
             
             balls.push_back(ofPtr<Ball>(new Ball( ofPtr<ofxBox2dCircle>(new ofxBox2dCircle()) )));
             
@@ -715,7 +736,7 @@ void ofApp::draw(){
     gettimeofday(&now,NULL);
     int nowTime = ( now.tv_sec - start.tv_sec ) * 1000 + (now.tv_usec - start.tv_usec ) / 1000 ;
     std::cout << "time:" << nowTime << std::endl;
-    for ( int i = 0 ; i <40 ; i ++){
+    for ( int i = 0 ; i < tempo_list.size() ; i ++){
         if(abs(nowTime - tempo_list[i])  < 50){
             ofRect(640,200,100,100);
         }
